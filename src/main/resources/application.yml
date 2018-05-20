@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/prediction?useSSL=false
+    username: root
+    password: Root!123
+    driver-class-name: org.gjt.mm.mysql.Driver
+
+  http:
+    encoding:
+      charset: UTF-8
+
+mybatis:
+  type-aliases-package: com.harry.prediction.entity
+  configuration:
+    use-generated-keys: true
+
+logging:
+  level:
+    com:
+      harry:
+        prediction:
+          mapper: DEBUG
+
+# 微信小程序配置
+wechat:
+  appid: 123
+  secret: 123
+  grantType: authorization_code
+  baseUrl: https://api.weixin.qq.com
+  openIdUrl: /sns/jscode2session
+  accessTokenUrl: /cgi-bin/token
+  messageUrl: /cgi-bin/message/wxopen/template/send
+  #模板消息ID
+  messageId: 123
+  page: showMessage
