@@ -54,6 +54,7 @@ public class WeChatServiceImp implements WeChatService {
             accessToken = accessTokenJson.getString("access_token");
             requestParam.put("touser", toUser);
             requestParam.put("template_id", weChatConfig.getMessageId());
+            requestParam.put("page", weChatConfig.getPage());
             requestParam.put("form_id", formId);
             requestParam.put("data", data);
         } catch (JSONException e) {
