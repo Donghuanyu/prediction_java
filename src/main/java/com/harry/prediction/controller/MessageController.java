@@ -30,8 +30,8 @@ public class MessageController {
     @Autowired
     private WeChatService weChatService;
 
-    private static final String TO_USSER = "to_user";
-    private static final String FROM_USSER = "from_user";
+    private static final String TO_USER = "to_user";
+    private static final String FROM_USER = "from_user";
 
     @RequestMapping(value = "/leaveMessage", method = RequestMethod.POST)
     public Response<String> leaveMessage(@RequestBody RequestForMessage requestForMessage) {
@@ -125,7 +125,7 @@ public class MessageController {
         List<Message> messages = messageService.findByToUserId(userId);
         if (messages == null)
             return Response.buildSuccessResponse(null);
-        return Response.buildSuccessResponse(getResponseForMessageList(TO_USSER, messages));
+        return Response.buildSuccessResponse(getResponseForMessageList(TO_USER, messages));
     }
 
     /**
@@ -141,7 +141,7 @@ public class MessageController {
         if (messages == null)
             return Response.buildSuccessResponse(null);
 
-        return Response.buildSuccessResponse(getResponseForMessageList(FROM_USSER, messages));
+        return Response.buildSuccessResponse(getResponseForMessageList(FROM_USER, messages));
     }
 
     /**
@@ -153,7 +153,7 @@ public class MessageController {
     public Response<ResponseForPageMessage> getMessageList(
             @RequestParam("userId")String userId, @RequestParam(value = "page", defaultValue = "1")Integer page) {
 
-        return getResponseForPageMessage(TO_USSER, userId, page);
+        return getResponseForPageMessage(TO_USER, userId, page);
     }
 
     /**
@@ -165,7 +165,7 @@ public class MessageController {
     public Response<ResponseForPageMessage> getFromMessageList(
             @RequestParam("userId")String userId, @RequestParam(value = "page", defaultValue = "1")Integer page) {
 
-        return getResponseForPageMessage(FROM_USSER, userId, page);
+        return getResponseForPageMessage(FROM_USER, userId, page);
     }
 
     /**
@@ -181,9 +181,9 @@ public class MessageController {
             return Response.buildFailedResponse("参数错误");
 
         int sum = 0;
-        if (TO_USSER.equals(tag)) {
+        if (TO_USER.equals(tag)) {
             sum = messageService.countByToUserId(userId);
-        } else if (FROM_USSER.equals(tag)) {
+        } else if (FROM_USER.equals(tag)) {
             sum = messageService.countByFromUserId(userId);
         }
         if (sum <= 0){
@@ -199,9 +199,9 @@ public class MessageController {
             return Response.buildFailedResponse("参数错误");
 
         List<Message> messages = null;
-        if (TO_USSER.equals(tag)) {
+        if (TO_USER.equals(tag)) {
             messages = messageService.findByToUserId(userId, page, MessageService.PAGE_SIZE);
-        } else if (FROM_USSER.equals(tag)) {
+        } else if (FROM_USER.equals(tag)) {
             messages = messageService.findByFromUserId(userId, page, MessageService.PAGE_SIZE);
         }
         if (messages == null)
@@ -225,9 +225,9 @@ public class MessageController {
         ResponseForMessage responseForMessage;
         for (Message message: messages) {
             responseForMessage = new ResponseForMessage();
-            if (TO_USSER.equals(tag)) {
+            if (TO_USER.equals(tag)) {
                 user = userService.findById(message.getFromUserId());
-            } else if (FROM_USSER.equals(tag)) {
+            } else if (FROM_USER.equals(tag)) {
                 user = userService.findById(message.getToUserId());
             } else {
                 user = userService.findById(message.getToUserId());
