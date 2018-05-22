@@ -8,6 +8,14 @@ import com.harry.prediction.entity.MatchUser;
 public interface MatchUserService {
 
     /**
+     * 根据ID查询出用户
+     * 如果有同名的，随机抽取
+     * @param id    ID
+     * @return      MatchUser
+     */
+    MatchUser findById(String id);
+
+    /**
      * 根据昵称查询出用户
      * 如果有同名的，随机抽取
      * @param name  昵称

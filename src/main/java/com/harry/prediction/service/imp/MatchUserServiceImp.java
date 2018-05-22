@@ -17,6 +17,14 @@ public class MatchUserServiceImp implements MatchUserService {
     private MatchUserMapper matchUserMapper;
 
     @Override
+    public MatchUser findById(String id) {
+        if (null == id || "".equals(id))
+            return null;
+
+        return matchUserMapper.findById(id);
+    }
+
+    @Override
     public MatchUser findByName(String name) {
 
         if (null == name || "".equals(name))

@@ -14,6 +14,8 @@ public class ResponseForMessage {
 
     private String content;
 
+    private String time;
+
     public String getUserId() {
         return userId;
     }
@@ -60,5 +62,13 @@ public class ResponseForMessage {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

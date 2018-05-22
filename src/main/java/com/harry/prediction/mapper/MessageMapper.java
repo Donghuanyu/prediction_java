@@ -12,12 +12,12 @@ public interface MessageMapper {
     @SelectKey(keyProperty = "id",resultType = String.class, before = true,
             statement = "select replace(uuid(), '-', '')")
     @Options(useGeneratedKeys = true)
-    @Insert("INSERT INTO message(id, to_user_id, from_user_id, content) VALUES " +
-            "(#{id}, #{toUserId}, #{fromUserId}, #{content})")
+    @Insert("INSERT INTO message(id, to_user_id, from_user_id, content, time) VALUES " +
+            "(#{id}, #{toUserId}, #{fromUserId}, #{content}, #{time})")
     void insert(Message message);
 
 
-    @Select("SELECT * From message where to_user_id = #{toUserId}")
+    @Select("SELECT * From message where to_user_id = #{toUserId} order by time DESC")
     @Results({
             @Result(column = "to_user_id", property = "toUserId"),
             @Result(column = "from_user_id", property = "fromUserId")

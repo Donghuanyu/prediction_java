@@ -66,20 +66,21 @@ public class MessageController {
         JSONObject note = new JSONObject();
         JSONObject project = new JSONObject();
         JSONObject msg = new JSONObject();
+        String leaveMsgTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                .format(new Date());
+        requestForMessage.getMessage().setTime(leaveMsgTime);
         try {
             nickName.put("value", fromUser.getNickName());
-            time.put("value",
-                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                            .format(new Date()));
+            time.put("value", leaveMsgTime);
             name.put("value", fromUser.getNickName());
             note.put("value", "备注测试");
-            project.put("value", "项目测试");
+            project.put("value", "邀请你来答题测试");
             msg.put("value", requestForMessage.getMessage().getContent());
             data.put("keyword1", nickName);
             data.put("keyword2", time);
             data.put("keyword3", name);
 //            data.put("keyword4", note);
-//            data.put("keyword5", project);
+            data.put("keyword5", project);
             data.put("keyword6", msg);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -127,6 +128,7 @@ public class MessageController {
             responseForMessage.setGender(user.getGender());
             responseForMessage.setNickName(user.getNickName());
             responseForMessage.setContent(message.getContent());
+            responseForMessage.setTime(message.getTime());
             result.add(responseForMessage);
         }
         return Response.buildSuccessResponse(result);

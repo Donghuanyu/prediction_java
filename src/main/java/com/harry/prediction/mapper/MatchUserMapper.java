@@ -17,6 +17,19 @@ import java.util.List;
 public interface MatchUserMapper {
 
     /**
+     * 根据ID查询出对应的用户信息
+     * @param id        ID
+     * @return          List<MatchUser>
+     */
+    @Select("SELECT id, name, avatar_url, gender, business, employments, answer_vote_up" +
+            " FROM user WHERE id = #{id}")
+    @Results({
+            @Result(column = "avatar_url", property = "avatarUrl"),
+            @Result(column = "answer_vote_up", property = "answerVoteUp")
+    })
+    MatchUser findById(@Param("id")String id);
+
+    /**
      * 查询用户个数
      * @return      用户信息个数
      */
