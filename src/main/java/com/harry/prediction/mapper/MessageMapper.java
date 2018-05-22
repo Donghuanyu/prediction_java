@@ -22,5 +22,32 @@ public interface MessageMapper {
             @Result(column = "to_user_id", property = "toUserId"),
             @Result(column = "from_user_id", property = "fromUserId")
     })
-    List<Message> findByToUserId(@Param("toUserId") String toUserId);
+    List<Message> findByToUserId(@Param("toUserId")String toUserId);
+
+    @Select("SELECT * From message where from_user_id = #{fromUserId} order by time DESC")
+    @Results({
+            @Result(column = "to_user_id", property = "toUserId"),
+            @Result(column = "from_user_id", property = "fromUserId")
+    })
+    List<Message> findByFromUserId(@Param("fromUserId")String fromUserId);
+
+    @Select("SELECT COUNT(id) From message where to_user_id = #{toUserId}")
+    int countByToUserId(@Param("toUserId")String toUserId);
+
+    @Select("SELECT COUNT(id) From message where from_user_id = #{fromUserId}")
+    int countByFromUserId(@Param("fromUserId")String fromUserId);
+
+    @Select("SELECT * From message where to_user_id = #{toUserId} order by time DESC LIMIT #{start}, #{end}")
+    @Results({
+            @Result(column = "to_user_id", property = "toUserId"),
+            @Result(column = "from_user_id", property = "fromUserId")
+    })
+    List<Message> findForPageByToUserId(@Param("toUserId")String toUserId, @Param("start")int start, @Param("end")int end);
+
+    @Select("SELECT * From message where from_user_id = #{fromUserId} order by time DESC LIMIT #{start}, #{end}")
+    @Results({
+            @Result(column = "to_user_id", property = "toUserId"),
+            @Result(column = "from_user_id", property = "fromUserId")
+    })
+    List<Message> findForPageByFromUserId(@Param("fromUserId")String fromUserId, @Param("start")int start, @Param("end")int end);
 }

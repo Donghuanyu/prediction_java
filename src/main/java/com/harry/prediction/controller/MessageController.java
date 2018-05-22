@@ -8,6 +8,7 @@ import com.harry.prediction.service.WeChatService;
 import com.harry.prediction.vo.RequestForMessage;
 import com.harry.prediction.vo.Response;
 import com.harry.prediction.vo.ResponseForMessage;
+import com.harry.prediction.vo.ResponseForPageMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
@@ -28,6 +29,9 @@ public class MessageController {
     private UserService userService;
     @Autowired
     private WeChatService weChatService;
+
+    private static final String TO_USSER = "to_user";
+    private static final String FROM_USSER = "from_user";
 
     @RequestMapping(value = "/leaveMessage", method = RequestMethod.POST)
     public Response<String> leaveMessage(@RequestBody RequestForMessage requestForMessage) {
@@ -109,6 +113,11 @@ public class MessageController {
         return Response.buildSuccessResponse("OK");
     }
 
+    /**
+     * 获取发给userId的所有消息列表
+     * @param userId    用户ID
+     * @return          消息列表
+     */
     @RequestMapping(value = "/getMessageList", method = RequestMethod.POST)
     public Response<List<ResponseForMessage>> getMessageList(@RequestParam("userId") String userId) {
         if (userId == null || "".equals(userId))
@@ -116,12 +125,113 @@ public class MessageController {
         List<Message> messages = messageService.findByToUserId(userId);
         if (messages == null)
             return Response.buildSuccessResponse(null);
+        return Response.buildSuccessResponse(getResponseForMessageList(TO_USSER, messages));
+    }
+
+    /**
+     * 获取userId发出的所有消息列表
+     * @param userId    用户ID
+     * @return          消息列表
+     */
+    @RequestMapping(value = "/getFromMessageList", method = RequestMethod.POST)
+    public Response<List<ResponseForMessage>> getFromMessageList(@RequestParam("userId") String userId) {
+        if (userId == null || "".equals(userId))
+            return Response.buildFailedResponse("参数错误");
+        List<Message> messages = messageService.findByToUserId(userId);
+        if (messages == null)
+            return Response.buildSuccessResponse(null);
+
+        return Response.buildSuccessResponse(getResponseForMessageList(FROM_USSER, messages));
+    }
+
+    /**
+     * 分页获取发给userId的消息列表
+     * @param userId    用户ID
+     * @return          消息列表
+     */
+    @RequestMapping(value = "/getMessagePageList", method = RequestMethod.POST)
+    public Response<ResponseForPageMessage> getMessageList(
+            @RequestParam("userId")String userId, @RequestParam(value = "page", defaultValue = "1")Integer page) {
+
+        return getResponseForPageMessage(TO_USSER, userId, page);
+    }
+
+    /**
+     * 分页获取userId发送的消息列表
+     * @param userId    用户ID
+     * @return          消息列表
+     */
+    @RequestMapping(value = "/getFromMessagePageList", method = RequestMethod.POST)
+    public Response<ResponseForPageMessage> getFromMessageList(
+            @RequestParam("userId")String userId, @RequestParam(value = "page", defaultValue = "1")Integer page) {
+
+        return getResponseForPageMessage(FROM_USSER, userId, page);
+    }
+
+    /**
+     * 分页获取留言列表数据
+     * @param tag           标识获取用户发送的，还是获取用户收到的
+     * @param userId        用户ID
+     * @param page          页码
+     * @return              ResponseForPageMessage
+     */
+    private Response<ResponseForPageMessage> getResponseForPageMessage(String tag, String userId, int page) {
+
+        if (userId == null || "".equals(userId) || page < 1)
+            return Response.buildFailedResponse("参数错误");
+
+        int sum = 0;
+        if (TO_USSER.equals(tag)) {
+            sum = messageService.countByToUserId(userId);
+        } else if (FROM_USSER.equals(tag)) {
+            sum = messageService.countByFromUserId(userId);
+        }
+        if (sum <= 0){
+            //没有留言信息
+            return Response.buildSuccessResponse(null);
+        }
+        //有留言信息
+        double pageDouble = ((double) sum / MessageService.PAGE_SIZE);
+        int sumPage = (int) Math.ceil(pageDouble);
+
+        //如果当前请求页码大于中页码数
+        if (page > sumPage)
+            return Response.buildFailedResponse("参数错误");
+
+        List<Message> messages = null;
+        if (TO_USSER.equals(tag)) {
+            messages = messageService.findByToUserId(userId, page, MessageService.PAGE_SIZE);
+        } else if (FROM_USSER.equals(tag)) {
+            messages = messageService.findByFromUserId(userId, page, MessageService.PAGE_SIZE);
+        }
+        if (messages == null)
+            return Response.buildSuccessResponse(null);
+
+        ResponseForPageMessage result = new ResponseForPageMessage();
+        result.setSumPage(sumPage);
+        List<ResponseForMessage> responseForMessageList = getResponseForMessageList(tag, messages);
+        result.setResponseForMessages(responseForMessageList);
+        if (responseForMessageList == null || responseForMessageList.isEmpty()) {
+            result.setCurrentSize(0);
+        } else {
+            result.setCurrentSize(responseForMessageList.size());
+        }
+        return Response.buildSuccessResponse(result);
+    }
+
+    private List<ResponseForMessage> getResponseForMessageList(String tag, List<Message> messages) {
         List<ResponseForMessage> result = new ArrayList<>();
         User user;
         ResponseForMessage responseForMessage;
         for (Message message: messages) {
             responseForMessage = new ResponseForMessage();
-            user = userService.findById(message.getFromUserId());
+            if (TO_USSER.equals(tag)) {
+                user = userService.findById(message.getFromUserId());
+            } else if (FROM_USSER.equals(tag)) {
+                user = userService.findById(message.getToUserId());
+            } else {
+                user = userService.findById(message.getToUserId());
+            }
             responseForMessage.setUserId(user.getId());
             responseForMessage.setAvatarUrl(user.getAvatarUrl());
             responseForMessage.setOpenId(user.getOpenId());
@@ -131,6 +241,6 @@ public class MessageController {
             responseForMessage.setTime(message.getTime());
             result.add(responseForMessage);
         }
-        return Response.buildSuccessResponse(result);
+        return result;
     }
 }
