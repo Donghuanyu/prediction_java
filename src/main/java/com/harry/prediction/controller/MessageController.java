@@ -56,6 +56,10 @@ public class MessageController {
         if (toUser == null || fromUser == null)
             return Response.buildFailedResponse("发送消息失败");
 
+        String leaveMsgTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                .format(new Date());
+        requestForMessage.getMessage().setTime(leaveMsgTime);
+
         //跳过系统内置假用户
         if (toUser.getOpenId() == null ||
                 "".equals(toUser.getOpenId()) || toUser.getOpenId().startsWith("default_")){
@@ -70,9 +74,7 @@ public class MessageController {
         JSONObject note = new JSONObject();
         JSONObject project = new JSONObject();
         JSONObject msg = new JSONObject();
-        String leaveMsgTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                .format(new Date());
-        requestForMessage.getMessage().setTime(leaveMsgTime);
+
         try {
             nickName.put("value", fromUser.getNickName());
             time.put("value", leaveMsgTime);
