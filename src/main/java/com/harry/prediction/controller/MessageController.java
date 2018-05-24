@@ -190,7 +190,11 @@ public class MessageController {
         }
         if (sum <= 0){
             //没有留言信息
-            return Response.buildSuccessResponse(null);
+            ResponseForPageMessage result = new ResponseForPageMessage();
+            result.setSumPage(0);
+            result.setCurrentSize(0);
+            result.setResponseForMessages(null);
+            return Response.buildSuccessResponse(result);
         }
         //有留言信息
         double pageDouble = ((double) sum / MessageService.PAGE_SIZE);
@@ -206,8 +210,6 @@ public class MessageController {
         } else if (FROM_USER.equals(tag)) {
             messages = messageService.findByFromUserId(userId, page, MessageService.PAGE_SIZE);
         }
-        if (messages == null)
-            return Response.buildSuccessResponse(null);
 
         ResponseForPageMessage result = new ResponseForPageMessage();
         result.setSumPage(sumPage);
@@ -223,6 +225,9 @@ public class MessageController {
 
     private List<ResponseForMessage> getResponseForMessageList(String tag, List<Message> messages) {
         List<ResponseForMessage> result = new ArrayList<>();
+        if (messages == null || messages.isEmpty()) {
+            return result;
+        }
         User user;
         ResponseForMessage responseForMessage;
         for (Message message: messages) {

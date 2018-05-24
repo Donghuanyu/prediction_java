@@ -7,9 +7,6 @@ import com.harry.prediction.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 public class MatchUserServiceImp implements MatchUserService {
 
@@ -56,22 +53,17 @@ public class MatchUserServiceImp implements MatchUserService {
         if (null == matchUser.getAnswerVoteUp() || "".equals(matchUser.getAnswerVoteUp()))
             return null;
 
+        //循环所有答案去匹配，如果有匹配到就返回，没有匹配到就返回Null
+        MatchUser result;
         String[] answers = matchUser.getAnswerVoteUp().split("\\|");
-        String answer;
-        if (answers.length == 1){
-            //只点赞了一个问题，该问题能匹配到几个用户就返回几个用户
-            answer = answers[0];
-        }else {
-            //有多个答案，就随机抽取一个题目去匹配
-            int[] index = CommonUtil.randomCommon(0, answers.length, 1);
-            if (index == null) {
-                answer = answers[0];
-            }else {
-                answer = answers[index[0]];
+        for (String answer : answers) {
+            result = matchUserByAnswer(answer, matchUser.getGender());
+            if (result != null) {
+                result.setAnswerVoteUp(answer);
+                return result;
             }
         }
-
-        return matchUserByAnswer(answer, matchUser.getGender());
+        return null;
     }
 
     /**
@@ -94,19 +86,19 @@ public class MatchUserServiceImp implements MatchUserService {
         }else {
             count = matchUserMapper.countByAnswerAndGender(answer, "男");
         }
-        //没有匹配的用户，随机返回一个用户
+        //没有匹配的用户
         if (count == 0){
-            count = matchUserMapper.countAll();
+            return null;
         }
         int start = 1;
         int[] index = CommonUtil.randomCommon(1, count, 1);
         if (index != null) {
             start = index[0];
         }
-        return matchUserRandAndGender(gender, start);
+        return matchUserRandAndGender(answer, gender, start);
     }
 
-    private MatchUser matchUserRandAndGender(String gender, int start) {
+    private MatchUser matchUserRandAndGender(String answer, String gender, int start) {
 
         if (start <= 0){
             start = 1;
@@ -115,11 +107,11 @@ public class MatchUserServiceImp implements MatchUserService {
             gender = "未知";
         }
         if ("未知".equals(gender)) {
-            return matchUserMapper.findByRand(start);
+            return matchUserMapper.findBySameAnswerVoteUp(answer, start);
         } else if ("男".equals(gender)) {
-            return matchUserMapper.findByRandAndGender("女", start);
+            return matchUserMapper.findBySameAnswerVoteUpAndGender(answer, "女", start);
         }else {
-            return matchUserMapper.findByRandAndGender("男", start);
+            return matchUserMapper.findBySameAnswerVoteUpAndGender(answer, "男", start);
         }
 
     }

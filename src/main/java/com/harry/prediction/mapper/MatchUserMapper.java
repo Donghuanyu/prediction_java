@@ -8,8 +8,6 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.type.JdbcType;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 /**
  * 第三方平台（知乎）用户DAO
  */

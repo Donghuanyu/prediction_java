@@ -41,16 +41,13 @@ public class MatchUserController {
             //将对应的知乎用户ID更新到当前使用小程序的用户表中
             userService.updateMatchId(id, matchUser.getId());
         }
+        //没有点赞过任何问题
+        if (null == matchUser.getAnswerVoteUp() || "".equals(matchUser.getAnswerVoteUp()))
+            return Response.buildFailedResponse("抱歉，您还没有点赞过任何问题，无法为您匹配");
         //匹配点赞过相同问题的用户
         MatchUser result = matchUserService.findBySameAnswerVoteUp(matchUser);
         if (result == null)
             return Response.buildFailedResponse("没有点赞过相同问题的用户");
-        //查出用户的具体信息，包括点赞过的问题，然后取第一条点赞过的问题
-        result = matchUserService.findById(result.getId());
-        if (result.getAnswerVoteUp() != null && !"".equals(result.getAnswerVoteUp())){
-            String[] answerVoteUpArray = result.getAnswerVoteUp().split("\\|");
-            result.setAnswerVoteUp(answerVoteUpArray[0]);
-        }
         resultForMatch.setMatchUser(result);
         user = userService.findByMatchId(result.getId());
         resultForMatch.setUser(user);
