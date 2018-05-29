@@ -9,6 +9,8 @@ import com.harry.prediction.vo.RequestForMessage;
 import com.harry.prediction.vo.Response;
 import com.harry.prediction.vo.ResponseForMessage;
 import com.harry.prediction.vo.ResponseForPageMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
@@ -32,6 +34,7 @@ public class MessageController {
 
     private static final String TO_USER = "to_user";
     private static final String FROM_USER = "from_user";
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @RequestMapping(value = "/leaveMessage", method = RequestMethod.POST)
     public Response<String> leaveMessage(@RequestBody RequestForMessage requestForMessage) {
@@ -64,6 +67,7 @@ public class MessageController {
         if (toUser.getOpenId() == null ||
                 "".equals(toUser.getOpenId()) || toUser.getOpenId().startsWith("default_")){
             messageService.insert(requestForMessage.getMessage());
+            LOG.error("留言目标名称：{}，ID： {}, openId为空", toUser.getNickName(), toUser.getId());
             return Response.buildSuccessResponse("OK");
         }
 
@@ -99,8 +103,18 @@ public class MessageController {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        if (result == null || !result.has("errcode"))
+        if (result == null || !result.has("errcode")){
+            String resultMsg;
+            if (result == null) {
+                resultMsg = "result为空";
+            }else {
+                resultMsg = result.toString();
+            }
+            LOG.error("留言目标名称：{}, ID： {}, 留言失败：{}",
+                    toUser.getNickName(), toUser.getId(), resultMsg);
             return Response.buildFailedResponse("发送消息失败");
+        }
+
         int code;
         try {
             code = result.getInt("errcode");
@@ -108,9 +122,13 @@ public class MessageController {
             e.printStackTrace();
             code = -1;
         }
-        if (code != 0)
+        if (code != 0) {
+            LOG.error("留言目标名称：{}, ID： {}, 留言失败：{}",
+                    toUser.getNickName(), toUser.getId(), result.toString());
             return Response.buildFailedResponse("发送消息失败");
-
+        }
+        LOG.info("留言目标名称：{}, ID： {}, 留言成功：{}",
+                toUser.getNickName(), toUser.getId(), result.toString());
         messageService.insert(requestForMessage.getMessage());
         return Response.buildSuccessResponse("OK");
     }

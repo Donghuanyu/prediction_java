@@ -2,9 +2,12 @@ package com.harry.prediction.controller;
 
 import com.harry.prediction.entity.User;
 import com.harry.prediction.service.UserService;
+import com.harry.prediction.util.JsonUtil;
 import com.harry.prediction.vo.RequestForUserOpenId;
 import com.harry.prediction.vo.Response;
 import com.harry.prediction.vo.WeChatLogin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +18,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
     /**
      * 创建用户
      * @param requestForUserOpenId  requestForUserOpenId
@@ -39,11 +43,15 @@ public class UserController {
             current = requestForUserOpenId.getUser();
             current.setOpenId(weChatLogin.getOpenid());
             current.setSessionKey(weChatLogin.getSessionKey());
-            userService.insert(current);
+            try {
+                userService.insert(current);
+            } catch (Exception e) {
+                LOG.error("插入新的用户数据失败，用户数据：{}", JsonUtil.entity2Json(current));
+            }
             //去除sessionKey
             current.setSessionKey("");
         }
-
+        LOG.info("用户数据：{}", JsonUtil.entity2Json(current));
         return Response.buildSuccessResponse(current);
     }
 }
