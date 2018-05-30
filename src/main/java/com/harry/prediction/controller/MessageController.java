@@ -5,6 +5,7 @@ import com.harry.prediction.entity.User;
 import com.harry.prediction.service.MessageService;
 import com.harry.prediction.service.UserService;
 import com.harry.prediction.service.WeChatService;
+import com.harry.prediction.util.JsonUtil;
 import com.harry.prediction.vo.RequestForMessage;
 import com.harry.prediction.vo.Response;
 import com.harry.prediction.vo.ResponseForMessage;
@@ -52,6 +53,9 @@ public class MessageController {
         if (requestForMessage.getMessage().getContent() == null ||
                 "".equals(requestForMessage.getMessage().getContent()))
             return Response.buildFailedResponse("没有留言内容");
+
+        LOG.info("留言参数：{}", JsonUtil.entity2Json(requestForMessage));
+
         //组装留言消息内容并发送留言消息
         User fromUser = userService.findById(requestForMessage.getMessage().getFromUserId());
         User toUser = userService.findById(requestForMessage.getMessage().getToUserId());
