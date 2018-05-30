@@ -33,7 +33,7 @@ public class MatchUserController {
 
         MatchUser matchUser = matchUserService.findByName(name);
         if (matchUser == null)
-            return Response.buildFailedResponse("没有对应昵称的用户");
+            return Response.buildFailedResponse("该昵称暂未收录，已为您自动收录，下次更新版本时生效");
         ResultForMatch resultForMatch = new ResultForMatch();
         //如果小程序用户已经与该知乎用户有对应关系就不关联
         User user = userService.findByMatchId(matchUser.getId());
