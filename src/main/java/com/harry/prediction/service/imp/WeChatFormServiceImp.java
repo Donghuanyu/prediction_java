@@ -34,6 +34,16 @@ public class WeChatFormServiceImp implements WeChatFormService {
             LOG.info("插入formId时， formId为空");
             return;
         }
+        //去除开发工具的formId
+        if ("the formId is a mock one".equals(formId)) {
+            LOG.info("插入formId时， formId不可用");
+            return;
+        }
+        //去除无效的openId
+        if ("undefined".equals(openId)) {
+            LOG.info("插入openId时， openId不可用");
+            return;
+        }
         WeChatForm weChatForm = new WeChatForm();
         weChatForm.setOpenId(openId);
         weChatForm.setFormId(formId);

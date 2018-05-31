@@ -1,5 +1,6 @@
 package com.harry.prediction.controller;
 
+import com.harry.prediction.constant.CommonConstant;
 import com.harry.prediction.entity.PredictionResult;
 import com.harry.prediction.entity.Tag;
 import com.harry.prediction.entity.User;
@@ -114,6 +115,23 @@ public class PredictionResultController {
         requestForPredictionResult.getUser().setPredictionResultId(result.getId());
         userService.insertOrUpdate(requestForPredictionResult.getUser());
         if (users != null) {
+            //根据用户的测试结果，找出匹配到的用户结果
+            if (CommonConstant.GENDER_UNKNOW.equals(result.getGender())) {
+                //如果与性别无关
+                result.setMatchUserPredictionResultName(result.getValue());
+            } else if (CommonConstant.GENDER_MALE.equals(result.getGender())) {
+                // 男性，就找出女性的结果名称
+                result.setMatchUserPredictionResultName(
+                        predictionResultService.findByAnswerIdAndGender(
+                                result.getAnswerId(), CommonConstant.GENDER_FEMALE).getValue()
+                );
+            } else if (CommonConstant.GENDER_FEMALE.equals(result.getGender())) {
+                //如果是女性，就找出男性的结果
+                result.setMatchUserPredictionResultName(
+                        predictionResultService.findByAnswerIdAndGender(
+                                result.getAnswerId(), CommonConstant.GENDER_MALE).getValue()
+                );
+            }
             result.setUsers(users);
         }
         return Response.buildSuccessResponse(result);

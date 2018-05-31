@@ -65,7 +65,7 @@ public interface UserMapper {
      * @param gender                性别
      * @return                      用户集合
      */
-    @Select("SELECT id, open_id, result_id, nick_name, avatar_url, gender, city FROM prediction_user WHERE result_id = #{predictionResultId} AND gender != #{gender}")
+    @Select("SELECT id, open_id, result_id, nick_name, avatar_url, gender, city FROM prediction_user WHERE result_id = #{predictionResultId} AND gender != #{gender} AND open_id is not null")
     @Results({
             @Result(column = "open_id", property = "openId"),
             @Result(column = "result_id", property = "predictionResultId"),

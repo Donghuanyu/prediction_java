@@ -23,6 +23,17 @@ public interface PredictionResultMapper {
     void insert(PredictionResult predictionResult);
 
     /**
+     * 根据题目ID查询出测试结果
+     * @param id            id
+     * @return              PredictionResult
+     */
+    @Select("SELECT * FROM result WHERE id = #{id}")
+    @Results({
+            @Result(property = "answerId", column = "answer_id")
+    })
+    PredictionResult findById(@Param("id") String id);
+
+    /**
      * 根据类型查询出该类型下的所有测试结果
      * @param type      type
      * @return          List<PredictionResult>

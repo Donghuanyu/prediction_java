@@ -21,6 +21,15 @@ public class PredictionResultServiceImp implements PredictionResultService {
     }
 
     @Override
+    public PredictionResult findById(String id) {
+
+        if (id == null || "".equals(id))
+            return null;
+
+        return predictionResultMapper.findById(id);
+    }
+
+    @Override
     public List<PredictionResult> findByType(String type) {
 
         if (type == null || "".equals(type))

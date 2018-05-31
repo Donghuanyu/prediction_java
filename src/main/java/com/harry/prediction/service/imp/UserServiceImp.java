@@ -76,16 +76,53 @@ public class UserServiceImp implements UserService {
         if (users.size() <= 3)
             return users;
 
-        int[] index = CommonUtil.randomCommon(0, users.size(), 3);
+        //如果匹配到的结果 > 3，就筛选出系统的默认用户，尽量用正式用户数据匹配，如果真实数据不满3条，再用默认数据补充
+        List<User> realUsers = new ArrayList<>();
+        for (User user: users) {
+            if (!user.getOpenId().startsWith("default_")) {
+                realUsers.add(user);
+            }
+        }
+
+        if (!realUsers.isEmpty()) {
+            //数据总集合中移除真实用户
+            for (User user: realUsers) {
+                users.remove(user);
+            }
+        }
+
+        //如果真实用户 = 3，直接返回
+        if (realUsers.size() == 3) {
+            return realUsers;
+        }
+
+        int[] index;
+        //如果真实用户 < 3，就从剩下的users中补齐
+        if (realUsers.size() < 3) {
+            index = CommonUtil.randomCommon(0, users.size(), 3 - realUsers.size());
+            if (index == null){
+                index = new int[3 - realUsers.size()];
+                for (int i = 0; i < index.length; i++) {
+                    index[i] = i;
+                }
+            }
+            for (int anIndex : index) {
+                realUsers.add(users.get(anIndex));
+            }
+            return realUsers;
+        }
+
+        //如果真实用户 > 3，随机抽取3个
         List<User> result = new ArrayList<>();
+        index = CommonUtil.randomCommon(0, realUsers.size(), 3);
         if (index == null){
             index = new int[3];
-            index[0] = 0;
-            index[1] = 1;
-            index[2] = 2;
+            for (int i = 0; i < index.length; i++) {
+                index[i] = i;
+            }
         }
         for (int anIndex : index) {
-            result.add(users.get(anIndex));
+            result.add(realUsers.get(anIndex));
         }
         return result;
     }

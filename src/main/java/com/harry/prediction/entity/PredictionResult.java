@@ -18,6 +18,11 @@ public class PredictionResult {
 
     private String gender;
 
+    /**
+     * 答题匹配到的用户的答题测试结果名称（冗余字段）
+     */
+    private String matchUserPredictionResultName;
+
     private List<Tag> tags;
 
     private List<User> users;
@@ -75,6 +80,14 @@ public class PredictionResult {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public String getMatchUserPredictionResultName() {
+        return matchUserPredictionResultName;
+    }
+
+    public void setMatchUserPredictionResultName(String matchUserPredictionResultName) {
+        this.matchUserPredictionResultName = matchUserPredictionResultName;
     }
 
     public List<Tag> getTags() {

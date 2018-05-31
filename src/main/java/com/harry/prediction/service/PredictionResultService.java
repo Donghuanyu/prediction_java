@@ -8,6 +8,8 @@ public interface PredictionResultService {
 
     void insert(PredictionResult predictionResult);
 
+    PredictionResult findById(String id);
+
     /**
      * 根据类型，查询出该类型下的所有结果
      * @param type  type
