@@ -2,9 +2,12 @@ package com.harry.prediction.controller;
 
 import com.harry.prediction.entity.Message;
 import com.harry.prediction.entity.User;
+import com.harry.prediction.entity.WeChatForm;
 import com.harry.prediction.service.MessageService;
 import com.harry.prediction.service.UserService;
+import com.harry.prediction.service.WeChatFormService;
 import com.harry.prediction.service.WeChatService;
+import com.harry.prediction.util.JsonUtil;
 import com.harry.prediction.vo.RequestForMessage;
 import com.harry.prediction.vo.Response;
 import com.harry.prediction.vo.ResponseForMessage;
@@ -31,6 +34,8 @@ public class MessageController {
     private UserService userService;
     @Autowired
     private WeChatService weChatService;
+    @Autowired
+    private WeChatFormService weChatFormService;
 
     private static final String TO_USER = "to_user";
     private static final String FROM_USER = "from_user";
@@ -67,10 +72,20 @@ public class MessageController {
         if (toUser.getOpenId() == null ||
                 "".equals(toUser.getOpenId()) || toUser.getOpenId().startsWith("default_")){
             messageService.insert(requestForMessage.getMessage());
-            LOG.error("留言目标名称：{}，ID： {}, openId为空", toUser.getNickName(), toUser.getId());
+            LOG.error("留言目标名称：{}，ID：{}, openId：{}",
+                    toUser.getNickName(), toUser.getId(), toUser.getOpenId());
             return Response.buildSuccessResponse("OK");
         }
-
+        //先看此formId是否存在，不存在就插入数据库
+        weChatFormService.insert(fromUser.getOpenId(), requestForMessage.getFormId());
+        //获取toUser下的可用的formId
+        WeChatForm weChatForm = weChatFormService.getAvailableWeChatForm(toUser.getOpenId());
+        if (weChatForm == null) {
+            LOG.error("发送消息失败，没有可用的formId，用户数据: {}",
+                    JsonUtil.entity2Json(fromUser));
+            return Response.buildFailedResponse(
+                    Response.CODE_FAILED_MSG_NO_AVAILABLE_FORM,"抱歉，对方留言机会已经用完，改天再来试一试吧。", null);
+        }
         JSONObject data = new JSONObject();
         JSONObject nickName = new JSONObject();
         JSONObject time = new JSONObject();
@@ -78,7 +93,6 @@ public class MessageController {
         JSONObject note = new JSONObject();
         JSONObject project = new JSONObject();
         JSONObject msg = new JSONObject();
-
         try {
             nickName.put("value", fromUser.getNickName());
             time.put("value", leaveMsgTime);
@@ -96,7 +110,10 @@ public class MessageController {
             e.printStackTrace();
         }
         String resultString = weChatService.sendMessage(
-                toUser.getOpenId(), requestForMessage.getFormId(), data);
+                toUser.getOpenId(), weChatForm.getFormId(), data);
+        //不管成功与否，都算使用过了formId，需要更新使用次数
+        weChatFormService.updateUsed(
+                weChatForm.getOpenId(), weChatForm.getFormId(), weChatForm.getUsed() + 1);
         JSONObject result = null;
         try {
             result = new JSONObject(resultString);

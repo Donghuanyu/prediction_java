@@ -8,7 +8,8 @@ import java.io.Serializable;
 public class Response<T> implements Serializable {
 
     private static final String CODE_SUCCESS = "200";
-    private static final String CODE_FAILED = "555";
+    private static final String CODE_FAILED_COMMON = "555";
+    public static final String CODE_FAILED_MSG_NO_AVAILABLE_FORM = "567";
 
     private String code;
 
@@ -33,8 +34,12 @@ public class Response<T> implements Serializable {
         return buildSuccessResponse("success", data);
     }
 
+    public static <T>Response<T> buildFailedResponse(String code, String msg, T data){
+        return new Response(code, msg, data);
+    }
+
     public static <T>Response<T> buildFailedResponse(String msg, T data){
-        return new Response(CODE_FAILED, msg, data);
+        return buildFailedResponse(CODE_FAILED_COMMON, msg, data);
     }
 
     public static <T>Response<T> buildFailedResponse(String msg){
