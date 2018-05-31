@@ -7,5 +7,6 @@ public class CommonConstant {
     public static final String GENDER_MALE = "1";
     public static final String GENDER_FEMALE = "2";
 
-
+    //表单ID是否使用过：0-未使用
+    public static final int FORM_UNUSED = 0;
 }
